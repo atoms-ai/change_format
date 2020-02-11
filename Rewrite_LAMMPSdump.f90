@@ -5,16 +5,18 @@ PROGRAM DUMPRW
         REAL :: XLO,XHI,YLO,YHI,ZLO,ZHI
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 		SNAPSHOT ATOMS AND TIME !!!!!!!!!!!!!!!!!!!!!!!!!!!
-		INTEGER :: NAN,TIME, COUNT
+		    INTEGER :: NAN,TIME, COUNT
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 		ATOMIC PROPERTIES 		!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		INTEGER, ALLOCATABLE, DIMENSION(:)	:: ID, KTYPE
-		REAL, ALLOCATABLE, DIMENSION(:)   	:: X,Y,Z,VX,VY,VZ,S1,S2,S3
+		    INTEGER, ALLOCATABLE, DIMENSION(:)	:: ID, KTYPE
+		    REAL, ALLOCATABLE, DIMENSION(:)   	:: X,Y,Z,VX,VY,VZ,S1,S2,S3
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!		 STRINGS		 		!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		CHARACTER(LEN=80) 	:: time_str, atom_str, box_str, dump_str
+		    CHARACTER(LEN=80) 	:: time_str, atom_str, box_str, dump_str
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!		 Read the LAMMPS dumpfile		 		!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        COUNT=0   ! Counter initialised to zero, will read the number of rigid substrate atoms
 
         OPEN (UNIT = 14,FILE='../dump.imp1kmps.6000')
 
@@ -27,8 +29,6 @@ PROGRAM DUMPRW
 
 		ALLOCATE (ID(NAN),KTYPE(NAN),X(NAN),Y(NAN),Z(NAN),VX(NAN),VY(NAN),VZ(NAN),S1(NAN),S2(NAN),S3(NAN))
 
-
-    COUNT=0
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!		 Allocate arrays - end		 			!!!!!!!!!!!!!!!!!!!!!!!!!!!
         READ(14,"(A)") box_str
         READ(14,*) XLO,XHI
@@ -37,11 +37,13 @@ PROGRAM DUMPRW
         READ(14,"(A)") dump_str
         DO J=1,NAN
          READ(14,*) ID(J),X(J),Y(J),Z(J),VX(J),VY(J),VZ(J),S1(J),S2(J),S3(J)
-          IF((VX(I).EQ.0).AND.(VY(I).EQ.0).AND.(VZ(I).EQ.0)) THEN
-            KTYPE(I) = 2
+
+         !!!!!!!! Special case where ktype wasn't output, rigid particles have all velocities as zero, hence they will be assigned type 2, the rest being type 1!!!!!!!!!!!!!!!
+          IF((VX(J).EQ.0).AND.(VY(J).EQ.0).AND.(VZ(J).EQ.0)) THEN
+            KTYPE(J) = 2
             COUNT = COUNT+1
           ELSE
-            KTYPE(I) = 1
+            KTYPE(J) = 1
           END IF
         end do
 
@@ -62,8 +64,8 @@ PROGRAM DUMPRW
         WRITE(16,173) XLO, XHI
         WRITE(16,173) YLO, YHI
         WRITE(16,173) ZLO, ZHI
-        WRITE(16,"(A)") dump_str
-        WRITE(16,*) (IDGG(J),KTYPE(J),X(J),Y(J),Z(J),J=1,NAN) ! KTYPE in dump is same as KHIST in CMMG
+        WRITE(16,"(A)") "ITEM: ATOMS id type x y z"
+        WRITE(16,174) (ID(J),KTYPE(J),X(J),Y(J),Z(J),J=1,NAN) ! KTYPE in dump is same as KHIST in CMMG
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!					FORMATS			 				!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -74,7 +76,7 @@ PROGRAM DUMPRW
 !		Box dimensions FORMAT
 173   FORMAT(F0.2,1x,F0.2)
 !		dump FORMAT
-174   FORMAT(I0,1x,I0,1x,F0.2,1x,F0.2,1x,F0.2,1x,F0.2,1x,F0.2,1x,F0.2)
+174   FORMAT(I0,1x,I0,1x,F0.2,1x,F0.2,1x,F0.2)
 !		Other FORMAT
 199   FORMAT(I10,1x,(a))
 
