@@ -36,11 +36,6 @@ PROGRAM DUMP2DATA
         READ(14,*) dump_str
         DO J=1,NAN
           READ(14,*) ID(J),KTYPE(J),X(J),Y(J),Z(J),VX(J),VY(J),VZ(J),S1(J),S2(J),S3(J)
-          IF(KTYPE(J).EQ.3) THEN
-            KTYPE(J)=1
-          ELSE
-            KTYPE(J)=2
-          END IF
         END DO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!		 WRITE the modified LAMMPS datafile		 !!!!!!!!!!!!!!!!!!!!!!!!!!!
