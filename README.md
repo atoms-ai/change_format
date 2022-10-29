@@ -1,3 +1,3 @@
 # Modify_dumpfiles
 
-Fortran/Python/Ovitos files that perform modifications to the original atomic dumpfiles
+Fortran/Python/Ovitos files for analyzing atomistic/coarse-grained simulation datasets
